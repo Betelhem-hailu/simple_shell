@@ -1,211 +1,89 @@
-Project: simple_shell
+# Simple Shell 🖱️
 
-Table of Contents
+This simple shell includes the basic functionality of a traditional Unix-like command line user interface. Standard functions and system calls employed in simple shell include: access, execve, exit, fork, free, fstat, getline, malloc, perror, signal, stat, wait, write.
 
-Description
-File Structure
-File Structure
-Requirements
-Installation
-Usage
-Example of Use
-Bugs
-Authors
-License
-Description
+* [shell.h](shell.h) - program header file
+* [builtins.c](builtins.c) - major builtin functions
+  * `check_for_builtins` - checks to see if the user's command matches a builtin
+  * `new_exit` - exits the shell with the option of a specified status
+  * `_env` - prints the shell's environment variables to the standard output
+  * `new_setenv` - initializes a new environment variable, or modifies an existing one
+  * `new_unsetenv` - removes an environment variable
+* [builtins2.c](builtins2.c) - helper functions for the builtins
+  * `add_key` - creates a new environment variable
+  * `find_key` - finds an environment variable in the environment array
+  * `add_value` - creates a new environment variable string
+  * `_atoi` - converts a string into a non-negative integer
+* [environment.c](environment.c) - functions related to the environment
+  * `make_env` - creates the shell's environment from the parent process
+  * `free_env` - frees the shell's environment
+* [errors.c](errors.c) - functions related to printing errors
+  * `print_error` - prints an error message to the standard error
+  * `_puts2` - prints a string to the standard error
+  * `_uitoa` - converts an unsigned integer to a string
+* [memory_allocation.c](memory_allocation.c) - memory allocation functions
+  * `_realloc` - a custom realloc function for arrays of pointers
+* [new_strtok.c](new_strtok.c) - custom strtok and helper functions
+  * `check_match` - checks if a character matches any in a string
+  * `new_strtok` - a custom strtok for the shell
+* [path.c](path.c) - functions related to executing commands
+  * `path_execute` - executes a command in the PATH
+  * `find_path` - finds the PATH environment variable
+  * `check_for_path` - checks if the command is in the PATH
+  * `execute_cwd` - executes a command with an absolute path
+  * `check_for_dir` - checks if the command contains an absolute path
+* [simple_shell.c](simple_shell.c) - essential functions to the shell
+  * `main` - the main function of the program
+  * `sig_handler` - handles SIGINT
+* [strfunc.c](strfunc.c) - functions related to string manipulation
+  * `_puts` - writes a string to standart output
+  * `_strdup` - duplicates a string
+  * `_strcmpr` - compares two strings
+  * `_strcat` - concatenates two strings with a `/` in the middle
+  * `_strlen` - calculates the length of a string
+* [tokenize.c](tokenize.c) - tokenizing function
+  * `tokenize` - creates an array of tokens from a buffer with a specified delimiter
 
-Simple_shell is a command line interpreter, or shell, made by us in the tradition of the first Unix shell written by Ken Thompson in 1971. This shell is intentionally minimalistic, was made in order to practice the basics of C learning, yet includes the basic functionality of a traditional Unix-like command line user interface. Standard functions and system calls employed in simple_shell include: access, execve, exit, fork, free, fstat, getline, malloc, perror, signal, stat, wait, write.
+## Requirements
 
-File Structure
+simple shell is designed to run in the `Ubuntu 20.04 LTS` linux environment and to be compiled using the GNU compiler collection v. `gcc 12.1` with flags`-Wall, -Werror, -Wextra, -pedantic, and -std=gnu89.`
 
-main.h -Program header file
+## Installation
 
-.simple_shell_history - File where history's historial must be saved
+   - Clone this repository: `git clone "https://github.com/YohannesGetu/simple_shell.git"`
+   - Change directories into the repository: `cd simple_shell`
+   - Compile: `gcc -Wall -Werror -Wextra -pedantic *.c -o hsh`
+   - Run the shell in interactive mode: `./hsh`
+   - Or run the shell in non-interactive mode: example `echo "pwd" | ./hsh`
 
-builtins.c - Major builtin functions
-
-check_for_builtins - Checks if the command is a builtin
-new_exit - Exits the shell with the option of a specified status
-\_env - Prints the current shell's environment variables to the standard output
-new_setenv - Create a new environment variable, or edit an existing variable
-new_unsetenv - Removes an environment variable
-builtins2.c - Builtin functions that involves 'cd' builtin command.
-
-\_new_cd - Changes the current working directory .
-enviroment - More builtin functions
-
-make_enviroment - Make the shell environment from the environment.
-free_env - Free the shell's environment
-history.c - History builting and funcions related to it.
-
-add_nodeint - Add node in the beginning
-free_listint - Free pointers related with malloc
-new_history - Print the list of a single list
-\_puts3 - Writes a string to standard output
-print_message - Print a string to standart output
-add_functions.c - Helpers functions for forking process
-
-\_strcmp - Compares two strings
-error_printing - Prints a message error when a comand is not found.
-exec_error - Prints exec errors.
-helper_functions.c - Functions to manage error messages and utils
-
-\_puts_error - Print a string to sdandart error
-prints_error_msg - Prints error messages to standard error
-integer_converter - Converts an unsigned int to a string
-atoi - Converts a string into an integer
-setenv_functions.c - helper functions for setenv builting
-
-add_value - Creates a new environment variable string
-find_key - Finds an environment variable
-add_key - Create a new environment variable
-memory_allocation.c - memory allocation functions
-
-\_realloc - A custom realloc function for arrays of pointers
-new_strtok.c - Custom strtok and helper functions
-
-check_match - Checks if a character matches any in a string
-new_strtok - A custom strtok for the shell
-build_path - Combines two strings one representing the path directory and another representing the command file.
-fork_child.c - functions related to executing commands
-
-fork_child - Creates a child in order to execute another program.
-path_finder - Acts as an interface for functions that will be able
-to find the full path of a program.
-find_env_index - Finds the index of an environmental variable.
-tokenize_path - Separates a string of path as an array of
-strings containing the path directories.
-search_directories - Looks through directories stored in path_tokens
-for a specific file aka command.
-simple_shell.c - essential functions to the shell
-
-main - The main function of the program
-sig_handler - Handles SIGINT
-strfunctions.c - functions related to string manipulation
-
-\_puts - Writes a string to standart output
-\_strdup - Duplicates a string
-\_strcmpr - Compares two strings
-\_strcat - Concatenates two strings with a / in the middle
-\_strlen - Calculates the length of a string
-tokenizer.c - tokenizing function
-
-tokenizer - creates an array of tokens from a buffer with a specified delimiter
-tokenize -tokenizes a buffer with a delimiter just use for for_child
-token_interface - token interface
-count_token - token's count
-new_help.c - Help builting and functions
-
-new_help - Help builtin command
-new_help_help - Help builtin command help
-new_help_exit - Help builtin command exit
-new_help_cd - Help builtin command cd
-new_help_env - Help builtin command env
-more_help_functions.c - More help functions
-
-new_help_history - Help builtin command history
-new_help_unalias - Help builtin command unalias
-new_help_unset - Help builtin command unset
-new_help_unsetenv - Help builtin command unsetenv
-new_help_setenv - Help builtin command setenv
-more_help_functions2.c - More help functions
-
-new_help_alias - Help builtin command alias
-new_help_else - Error message if not command found
-print_functions.c - More utils
-
-print_str - Prints a string character by character.
-\_write_char - Writes a character to stdout
-print_number - Prints an unsigned number
-man_1_simple_shell - Shell Man page
-
-Directories
-
-helpfiles - arguments files for help building.
-Mishell - testing shell apart.
-shell2 - backup to test shell, outdated version.
-Requirements
-
-simple_shell is designed to run in the Ubuntu 14.04 LTS linux environment and to be compiled using the GNU compiler collection v. gcc 4.8.4 with flags-Wall, -Werror, -Wextra, and -pedantic.
-
-Installation
-
-- Clone this repository
-- Change directories into the repository: `cd simple_shell`
-- Compile: `gcc -Wall -Werror -Wextra -pedantic *.c -o hsh`
-- Run the shell in interactive mode: `./hsh`
-- Or run the shell in non-interactive mode: example `echo "pwd" | ./hsh`
-  Usage
-
-The simple_shell is designed to execute commands in a similar manner to sh, however with more limited functionality. The development of this shell is ongoing. The below features will be checked as they become available (see man page for complete information on usage):
-
-Features
-
-uses the PATH
-implements builtins
-handles command line arguments
-custom strtok function
-uses exit status
-shell continues upon Crtl+C (^C)
-handles comments (#)
-handles ;
-custom getline type function
-handles && and ||
-aliases
-variable replacement
-Builtins
-
-exit
-env
-setenv
-unsetenv
-cd
-help
-history
-Example of Use
-
+## Example of Use
 Run the executable in your terminal after compiling:
+```
+$ ./hsh
+$ # This is our rendition of the shell
+$ ls -al
+total 100
+drwxrwxr-x  3 vagrant vagrant  4096 Jul 19 22:49 .
+drwxr-xr-x 14 vagrant vagrant  4096 Jul 17 22:37 ..
+-rw-rw-r--  1 vagrant vagrant   144 Jul 19 17:16 AUTHORS
+-rw-rw-r--  1 vagrant vagrant  2367 Jul 19 22:33 builtins2.c
+-rw-rw-r--  1 vagrant vagrant  2764 Jul 19 22:14 builtins.c
+-rw-rw-r--  1 vagrant vagrant   710 Jul 16 01:03 environment.c
+-rw-rw-r--  1 vagrant vagrant  1217 Jul 16 03:24 errors.c
+drwxrwxr-x  8 vagrant vagrant  4096 Jul 19 22:34 .git
+-rwxrwxr-x  1 vagrant vagrant 32287 Jul 19 22:34 hsh
+-rw-rw-r--  1 vagrant vagrant  1792 Jul 19 22:12 man_1_simple_shell
+-rw-rw-r--  1 vagrant vagrant   484 Jul 15 20:09 memory_allocation.c
+-rw-rw-r--  1 vagrant vagrant  1273 Jul 18 21:00 new_strtok.c
+-rw-rw-r--  1 vagrant vagrant  3427 Jul 19 22:06 path.c
+-rw-rw-r--  1 vagrant vagrant  2347 Jul 19 22:49 README.md
+-rw-rw-r--  1 vagrant vagrant  1769 Jul 19 22:04 shell.h
+-rw-rw-r--  1 vagrant vagrant  1480 Jul 18 21:15 simple_shell.c
+-rw-rw-r--  1 vagrant vagrant  2111 Jul 16 01:10 strfunc.c
+-rw-rw-r--  1 vagrant vagrant   719 Jul 19 21:46 tokenize.c
+```
 
-$ ls
-add_functions.c helpfiles more_help_functions2.c shell2
-builtings.c main.h more_help_functions.c strfunctions.c
-enviroment.c hsh new_help.c tokenizer.c
-env_unsetenv_functions.c main.c new_strtok.c
-fork_child.c memory_allocation.c print_functions.c
-helper_functions.c Mishell README.md
-$ help 2
-./hsh: 5: help: no help topics match: `2'. Try `help help' or `man -k 2' or `info 2'.
-$ help cd
-cd: cd
-Change the shell working directory.
+## Authors 🦖
+Chiedozie Ukah | [GitHub](https://github.com/dozonalx) | [Email](mailto:dozieukah@gmail.com>)
 
-    Change the current directory to DIR.  The default DIR is the value of the
-    HOME shell variable.
-
-    The variable CDPATH defines the search path for the directory containing
-    DIR.  Alternative directory names in CDPATH are separated by a colo
-
-n (:).
-A null directory name is the same as the current directory. If DIR begins
-with a slash (/), then CDPATH is not used.
-
-    Exit Status:
-    Returns 0 if the directory is changed, and if $PWD is set successfully when
-    -P is used; non-zero otherwise.
-
-$ pwd
-/home/shell_test/shelltestenviroment
-$
-Bugs
-
-At this time, there are no known bugs.
-
-Authors
-
-Irene Wangari Minyu | GitHub
-
-Brian Mayora | GitHub
-
-License
-
-simple_shell is open source and therefore free to download and use without permission.
+Grace Effiong | [GitHub](https://github.com/Rubylena) | [Email](mailto:graceffiong@gmail.com)

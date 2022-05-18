@@ -1,4 +1,4 @@
-#include "main.h"
+#include "shell.h"
 
 /**
  * check_for_builtins - checks if the command is a builtin
@@ -13,15 +13,12 @@ void (*check_for_builtins(vars_t *vars))(vars_t *vars)
 		{"env", _env},
 		{"setenv", new_setenv},
 		{"unsetenv", new_unsetenv},
-		{"cd", new_cd},
-		{"help", new_help},
-
-		{NULL, NULL}};
+		{NULL, NULL}
+	};
 
 	for (i = 0; check[i].f != NULL; i++)
 	{
-		/** vars->array_tokens find tokens that match */
-		if (_strcmpr(vars->array_tokens[0], check[i].name) == 0)
+		if (_strcmpr(vars->av[0], check[i].name) == 0)
 			break;
 	}
 	if (check[i].f != NULL)
@@ -36,33 +33,27 @@ void (*check_for_builtins(vars_t *vars))(vars_t *vars)
  */
 void new_exit(vars_t *vars)
 {
-
 	int status;
-	/**if tokens match exit the program*/
-	if (_strcmpr(vars->array_tokens[0], "exit") ==
-			0 &&
-		vars->array_tokens[1] != NULL)
 
+	if (_strcmpr(vars->av[0], "exit") == 0 && vars->av[1] != NULL)
 	{
-		/* atoi converts a token string to an integer.*/
-		status = _atoi(vars->array_tokens[1]);
-		/* finds the validity of the status*/
+		status = _atoi(vars->av[1]);
 		if (status == -1)
 		{
 			vars->status = 2;
-			/*if status = -1 display error */
-			prints_error_msg(vars, ": Illegal number: ");
-			print_message(vars->array_tokens[1]);
-			print_message("\n");
+			print_error(vars, ": Illegal number: ");
+			_puts2(vars->av[1]);
+			_puts2("\n");
+			free(vars->commands);
+			vars->commands = NULL;
 			return;
 		}
 		vars->status = status;
 	}
-	free(vars->commands);
-	free(vars->array_tokens);
-
-	free_env(vars->env);
 	free(vars->buffer);
+	free(vars->av);
+	free(vars->commands);
+	free_env(vars->env);
 	exit(vars->status);
 }
 
@@ -93,28 +84,25 @@ void new_setenv(vars_t *vars)
 {
 	char **key;
 	char *var;
-	/** display error message if token == NULL**/
-	if (vars->array_tokens[1] == NULL || vars->array_tokens[2] == NULL)
-	{
 
-		prints_error_msg(vars, ": Incorrect number of arguments\n");
+	if (vars->av[1] == NULL || vars->av[2] == NULL)
+	{
+		print_error(vars, ": Incorrect number of arguments\n");
 		vars->status = 2;
 		return;
 	}
-	key = find_key(vars->env, vars->array_tokens[1]);
+	key = find_key(vars->env, vars->av[1]);
 	if (key == NULL)
-	{
 		add_key(vars);
-	}
 	else
 	{
-		var = add_value(vars->array_tokens[1], vars->array_tokens[2]);
+		var = add_value(vars->av[1], vars->av[2]);
 		if (var == NULL)
 		{
-			prints_error_msg(vars, NULL);
+			print_error(vars, NULL);
 			free(vars->buffer);
-			free(vars->array_tokens);
 			free(vars->commands);
+			free(vars->av);
 			free_env(vars->env);
 			exit(127);
 		}
@@ -133,18 +121,19 @@ void new_setenv(vars_t *vars)
 void new_unsetenv(vars_t *vars)
 {
 	char **key, **newenv;
+
 	unsigned int i, j;
 
-	if (vars->array_tokens[1] == NULL)
+	if (vars->av[1] == NULL)
 	{
-		prints_error_msg(vars, ": Incorrect number of arguments\n");
+		print_error(vars, ": Incorrect number of arguments\n");
 		vars->status = 2;
 		return;
 	}
-	key = find_key(vars->env, vars->array_tokens[1]);
+	key = find_key(vars->env, vars->av[1]);
 	if (key == NULL)
 	{
-		prints_error_msg(vars, ": No variable to unset");
+		print_error(vars, ": No variable to unset");
 		return;
 	}
 	for (i = 0; vars->env[i] != NULL; i++)
@@ -152,7 +141,7 @@ void new_unsetenv(vars_t *vars)
 	newenv = malloc(sizeof(char *) * i);
 	if (newenv == NULL)
 	{
-		prints_error_msg(vars, NULL);
+		print_error(vars, NULL);
 		vars->status = 127;
 		new_exit(vars);
 	}
